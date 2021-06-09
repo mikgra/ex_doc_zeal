@@ -17,12 +17,15 @@ def run(file_name)
   when :public_module then
     handle_module(doc, file_name)
   end
+rescue NoMethodError => e
+  STDERR.puts "Error parsing #{file_name}"
+  raise e
 end
 
 def check_doc_type(doc)
   mod = doc.css('#moduledoc')
-  exception = doc.css('#content > h1 > small:nth-child(2):contains("exception")')
-  protocol = doc.css('#content > h1 > small:nth-child(2):contains("protocol")')
+  exception = doc.css('#content > h1 > small:nth-child(1):contains("exception")')
+  protocol = doc.css('#content > h1 > small:nth-child(1):contains("protocol")')
   mix_task = doc.css('#content > h1:contains("mix ")')
   mod = doc.css('#moduledoc')
   if !exception.empty?
@@ -41,7 +44,7 @@ end
 def handle_module(doc, file_name)
   text = doc.css("#content > h1").first.text.strip!
 
-  matches = text.match(/[a-zA-Z]* v[0-9\.]*\n *([a-zA-Z\. ]*)\n/)
+  matches = text.match(/([a-zA-Z\. ]*)/)
   mod = if matches
           matches.captures.first.strip.delete_suffix(' behaviour')
         else
@@ -82,21 +85,21 @@ end
 
 def handle_exception(doc, file_name)
   mod = doc.css("#content > h1").first.text.strip!
-           .match(/[a-zA-Z]* v[0-9\.]*\n *([a-zA-Z\. ]*)\n/)
+           .match(/([a-zA-Z\. ]*)/)
            .captures.first.strip.delete_suffix(' exception')
   puts "INSERT INTO searchIndex(name, type, path) VALUES ('#{mod}', 'Exception', '#{file_name}');"
 end
 
 def handle_protocol(doc, file_name)
   mod = doc.css("#content > h1").first.text.strip!
-           .match(/[a-zA-Z]* v[0-9\.]*\n *([a-zA-Z\. ]*)\n/)
+           .match(/([a-zA-Z\. ]*)/)
            .captures.first.strip.delete_suffix(' protocol')
   puts "INSERT INTO searchIndex(name, type, path) VALUES ('#{mod}', 'Protocol', '#{file_name}');"
 end
 
 def handle_mix_task(doc, file_name)
   task = doc.css("#content > h1").first.text.strip!
-            .match(/[a-zA-Z]* v[0-9\.]*\n *([a-zA-Z\. ]*)\n/)
+            .match(/([a-zA-Z\. ]*)/)
             .captures.first.strip!
   puts "INSERT INTO searchIndex(name, type, path) VALUES ('#{task}', 'Mix Task', '#{file_name}');"
 end
