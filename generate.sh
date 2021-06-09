@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PACKAGE=$1
-DOCSETS_PATH=~/Library/Application\ Support/Zeal/Zeal/docsets
+DOCSETS_PATH=~/.local/share/Zeal/Zeal/docsets
 # Download and move to input
 rm -rf ~/.hex/docs/hexpm/${PACKAGE}
 rm -rf _input
